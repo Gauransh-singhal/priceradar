@@ -1,36 +1,26 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PriceRadar India 🎯
 
-## Getting Started
+Compare prices across India's top e-commerce platforms instantly.
 
-First, run the development server:
+## Live Demo
+https://priceradar-tau.vercel.app
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## What it does
+PriceRadar lets you search any product and instantly compare prices across 9 Indian platforms — Flipkart, Amazon, BigBasket, Blinkit, JioMart, Croma, Vijay Sales, Reliance Digital, Apollo Pharmacy, Tata 1mg, and Nike.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Key features:
+- **Cross-platform search** across 9 platforms simultaneously
+- **Category filtering** — Electronics, Grocery, Pharmacy, Fashion
+- **AI Deal Analysis** powered by Claude — get a deal score, verdict, and recommendation
+- **Savings Summary** — see average savings and cheapest platform at a glance
+- **Best Deal detection** — automatically highlights the lowest price found
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Built with
+- Next.js + TypeScript
+- Tailwind CSS
+- Anakin Wire API (Holocron) for real-time data
+- Claude AI (Anthropic) for deal analysis
+- Vercel for deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Built for
+Anakin Build-a-thon 2026
