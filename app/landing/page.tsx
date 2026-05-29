@@ -14,7 +14,7 @@ export default function LandingPage() {
   function handleSearch() {
     const q = query.trim();
     if (!q) return;
-    router.push(`/?q=${encodeURIComponent(q)}`);
+    router.push(`/dashboard?q=${encodeURIComponent(q)}`);
   }
 
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
@@ -54,7 +54,7 @@ export default function LandingPage() {
           </span>
 
           <a
-            href="/"
+            href="/dashboard"
             className="inline-flex items-center gap-2 px-5 py-2 bg-black text-white text-[11px] font-bold tracking-[0.15em] uppercase hover:bg-green-600 transition-colors"
           >
             Launch App →
@@ -261,7 +261,7 @@ export default function LandingPage() {
             <span className="text-green-500">overpaying?</span>
           </h2>
           <a
-            href="/"
+            href="/dashboard"
             className="inline-flex items-center gap-2 px-8 py-4 bg-white text-black text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-green-500 hover:text-white transition-colors shadow-[4px_4px_0px_0px_rgba(22,163,74,1)]"
           >
             Launch PriceRadar →
