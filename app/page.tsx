@@ -217,18 +217,27 @@ export default function Home() {
     >
       {/* ── Navbar ── */}
       <nav className="sticky top-0 z-50 bg-white border-b-2 border-black">
-        <div className="max-w-7xl mx-auto px-4 h-14 flex items-center gap-4">
-          {/* Logo */}
-          <span
-            className="text-2xl shrink-0 leading-none"
-            style={{ fontFamily: "var(--font-bebas, sans-serif)" }}
-          >
-            <span className="text-black">Price</span>
-            <span className="text-green-600">Radar</span>
-          </span>
+        <div className="max-w-7xl mx-auto px-4 py-3 md:py-0 md:h-14 flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
 
-          {/* Search */}
-          <div className="flex flex-1 max-w-2xl mx-auto shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+          {/* Mobile: logo + bell in one row. Desktop: logo only (bell moves to end via md:contents) */}
+          <div className="flex items-center justify-between md:contents">
+            <span
+              className="text-2xl shrink-0 leading-none"
+              style={{ fontFamily: "var(--font-bebas, sans-serif)" }}
+            >
+              <span className="text-black">Price</span>
+              <span className="text-green-600">Radar</span>
+            </span>
+            {/* Bell — mobile only */}
+            <button className="md:hidden w-9 h-9 flex items-center justify-center border-2 border-black hover:bg-gray-50 transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Search — full width on mobile, constrained on desktop */}
+          <div className="flex flex-1 md:max-w-2xl md:mx-auto shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
             <input
               type="text"
               value={searchQuery}
@@ -246,8 +255,8 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Bell */}
-          <button className="shrink-0 w-9 h-9 flex items-center justify-center border-2 border-black hover:bg-gray-50 transition-colors">
+          {/* Bell — desktop only */}
+          <button className="hidden md:flex shrink-0 w-9 h-9 items-center justify-center border-2 border-black hover:bg-gray-50 transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
@@ -258,12 +267,12 @@ export default function Home() {
       {/* ── Category Tabs ── */}
       <div className="border-b border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex">
+          <div className="flex overflow-x-auto scrollbar-none">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.name}
                 onClick={() => setCategory(cat.name)}
-                className={`flex items-center gap-1.5 px-5 py-3 text-[11px] font-bold tracking-[0.12em] uppercase border-b-2 transition-colors ${
+                className={`flex shrink-0 items-center gap-1.5 px-3 py-2.5 md:px-5 md:py-3 text-[11px] font-bold tracking-[0.12em] uppercase border-b-2 transition-colors whitespace-nowrap ${
                   category === cat.name
                     ? "border-green-600 text-green-600"
                     : "border-transparent text-gray-400 hover:text-black hover:border-gray-300"
@@ -297,12 +306,12 @@ export default function Home() {
           </div>
         )}
 
-        {/* Results: 70/30 */}
+        {/* Results: single col on mobile, 70/30 on lg+ */}
         {!loading && results.length > 0 && (
-          <div className="flex gap-6 items-start">
+          <div className="flex flex-col lg:flex-row gap-8">
 
-            {/* ── Main (70%) ── */}
-            <div className="flex-[7] min-w-0 space-y-10">
+            {/* ── Main ── */}
+            <div className="w-full lg:flex-[7] min-w-0 space-y-10">
 
               {/* Best Deal Hero */}
               {bestDeal && (
@@ -502,7 +511,7 @@ export default function Home() {
                 >
                   Price Comparison
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                   {results.map((pr) => {
                     const top = pr.results[0];
                     return (
@@ -527,9 +536,9 @@ export default function Home() {
                         </div>
 
                         {top ? (
-                          <div className="flex flex-col flex-1 p-3 gap-3">
+                          <div className="flex flex-col flex-1 p-2 md:p-3 gap-2 md:gap-3">
                             {/* Image */}
-                            <div className="h-32 bg-gray-50 flex items-center justify-center overflow-hidden">
+                            <div className="h-24 md:h-32 bg-gray-50 flex items-center justify-center overflow-hidden">
                               {top.image ? (
                                 <img
                                   src={top.image}
@@ -599,8 +608,8 @@ export default function Home() {
               </section>
             </div>
 
-            {/* ── Sidebar (30%) ── */}
-            <aside className="flex-[3] shrink-0 sticky top-20 space-y-4">
+            {/* ── Savings Summary — below grid on mobile, sticky sidebar on lg+ ── */}
+            <aside className="w-full lg:flex-[3] lg:sticky lg:top-20">
               <div className="border-2 border-black">
                 <div className="px-4 py-3 border-b-2 border-black bg-black">
                   <h3 className="text-xs font-black tracking-[0.2em] uppercase text-white">
