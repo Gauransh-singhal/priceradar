@@ -286,10 +286,19 @@ async function normalizeResults(jobData: unknown, platform: Platform): Promise<P
   }
 }
 
+function filterRelevantResults(products: ProductResult[], query: string): ProductResult[] {
+  const keywords = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const filtered = products.filter((p) =>
+    keywords.some((kw) => p.title.toLowerCase().includes(kw))
+  );
+  return filtered.length > 0 ? filtered : products;
+}
+
 async function searchPlatform(platform: Platform, query: string): Promise<PlatformResult> {
   try {
     const jobId = await submitTask(platform, query);
-    const results = await pollJob(jobId, platform);
+    const raw = await pollJob(jobId, platform);
+    const results = filterRelevantResults(raw, query);
     return { platform: platform.name, results };
   } catch (err) {
     return {
