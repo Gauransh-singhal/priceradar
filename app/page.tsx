@@ -39,13 +39,30 @@ function formatPrice(price: string): string {
 function getBestDeal(
   results: PlatformResults[]
 ): { platform: string; product: ProductResult } | null {
+  const EXCLUDED_FROM_BEST_DEAL = new Set(["Amazon (converted)", "Vijay Sales", "Blinkit"]);
+  const eligible = results.filter((r) => !EXCLUDED_FROM_BEST_DEAL.has(r.platform));
+
+  // Collect all valid prices to compute a median for sanity-checking
+  const allPrices = eligible
+    .flatMap((r) => r.results.map((p) => parsePrice(p.price)))
+    .filter((n) => n !== Infinity)
+    .sort((a, b) => a - b);
+
+  const median =
+    allPrices.length === 0
+      ? Infinity
+      : allPrices.length % 2 === 1
+      ? allPrices[Math.floor(allPrices.length / 2)]
+      : (allPrices[allPrices.length / 2 - 1] + allPrices[allPrices.length / 2]) / 2;
+
   let best: { platform: string; product: ProductResult } | null = null;
   let bestPrice = Infinity;
-  const EXCLUDED_FROM_BEST_DEAL = new Set(["Amazon (converted)", "Vijay Sales", "Blinkit"]);
-  for (const r of results.filter((r) => !EXCLUDED_FROM_BEST_DEAL.has(r.platform))) {
+
+  for (const r of eligible) {
     for (const p of r.results) {
       const price = parsePrice(p.price);
-      if (price < bestPrice) {
+      // Skip prices that are less than 20% of the median — likely accessories or bad data
+      if (price < bestPrice && price >= median * 0.2) {
         bestPrice = price;
         best = { platform: r.platform, product: p };
       }
