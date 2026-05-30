@@ -21,41 +21,56 @@ interface AnalysisResult {
   bestPlatform: string;
   reasoning: string;
   savings: number;
+  timing_verdict: "BUY_NOW" | "WAIT" | "MONITOR";
+  timing_reason: string;
 }
 
-function buildPrompt(query: string, results: PlatformResults[]): string {
+function buildPrompt(query: string, results: PlatformResults[], category: string): string {
   const lines = results
     .filter((r) => r.results[0])
-    .map((r) => `- ${r.platform}: "${r.results[0].title}" — ₹${r.results[0].price}`)
+    .map((r) => {
+      const top = r.results[0];
+      const price = parseFloat(top.price.replace(/[^0-9.]/g, ""));
+      const mrp = parseFloat(top.mrp.replace(/[^0-9.]/g, ""));
+      const discountStr =
+        !isNaN(price) && !isNaN(mrp) && mrp > price && mrp > 0
+          ? ` (${Math.round(((mrp - price) / mrp) * 100)}% off MRP ₹${top.mrp})`
+          : "";
+      return `- ${r.platform}: ₹${top.price}${discountStr}`;
+    })
     .join("\n");
 
-  return `You are a price analysis expert for Indian e-commerce. \
-Analyse these search results for '${query}' and return ONLY a JSON \
-object with no markdown, no backticks, just raw JSON:
+  return `You are a price analysis expert for Indian e-commerce.
+Current date: May 2026. Product category: ${category}.
+Analyse these search results for '${query}' and return ONLY a JSON object with no markdown, no backticks, just raw JSON:
 {
   "score": <number 1-10, how good is the best deal>,
   "verdict": <one sentence summary>,
   "recommendation": <"Buy Now" | "Wait" | "Compare More">,
   "bestPlatform": <platform name>,
   "reasoning": <2-3 sentences explaining the analysis>,
-  "savings": <percentage saved vs average price as a number>
+  "savings": <percentage saved vs average price as a number>,
+  "timing_verdict": <"BUY_NOW" | "WAIT" | "MONITOR">,
+  "timing_reason": <one sentence explaining timing based on Indian sale cycles and product refresh cycles>
 }
 
 Results:
 ${lines}
 
-Base the score on: how much below average the best price is, \
-number of platforms with stock, price consistency across platforms.`;
+Scoring: how much below average the best price is, number of platforms with stock, price consistency.
+Timing guidance — Indian e-commerce calendar: Flipkart Big Billion Days (Oct), Amazon Great Indian Festival (Oct), Republic Day sales (Jan), Independence Day sales (Aug), Diwali sales (Oct/Nov). Consider imminent product launches (iPhones launch Sep, flagship Android phones vary). BUY_NOW = unusually good deal or no better timing expected soon. WAIT = major sale event or product refresh within 1-3 months. MONITOR = prices actively fluctuating.`;
 }
 
 export async function POST(request: NextRequest) {
   let query: string;
   let results: PlatformResults[];
+  let category = "All";
 
   try {
     const body = await request.json();
-    query   = body.query;
-    results = body.results;
+    query    = body.query;
+    results  = body.results;
+    category = typeof body.category === "string" ? body.category : "All";
     if (!query || !Array.isArray(results)) {
       return NextResponse.json(
         { error: "Request body must include query (string) and results (array)" },
@@ -73,7 +88,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const prompt = buildPrompt(query, results);
+  const prompt = buildPrompt(query, results, category);
 
   let claudeRes: Response;
   try {

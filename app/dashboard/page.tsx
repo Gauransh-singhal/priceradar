@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, KeyboardEvent } from "react";
+import PriceSpreadChart from "@/components/PriceSpreadChart";
+import TimingVerdict from "@/components/TimingVerdict";
+import RecentSearches from "@/components/RecentSearches";
 
 interface ProductResult {
   title: string;
@@ -23,6 +26,8 @@ interface AnalysisResult {
   bestPlatform: string;
   reasoning: string;
   savings: number;
+  timing_verdict?: "BUY_NOW" | "WAIT" | "MONITOR";
+  timing_reason?: string;
 }
 
 function parsePrice(price: string): number {
@@ -146,10 +151,21 @@ export default function Dashboard() {
   const [analysis, setAnalysis]       = useState<AnalysisResult | null>(null);
   const [analysing, setAnalysing]     = useState(false);
   const [analysisError, setAnalysisError] = useState("");
+  const [searchTrigger, setSearchTrigger] = useState(0);
 
-  async function handleSearch() {
-    const q = searchQuery.trim();
+  async function handleSearch(overrideQuery?: string) {
+    const q = (overrideQuery ?? searchQuery).trim();
     if (!q) return;
+
+    try {
+      const existing: string[] = JSON.parse(
+        localStorage.getItem("priceradar_recent") ?? "[]"
+      );
+      const updated = [q, ...existing.filter((s) => s !== q)].slice(0, 5);
+      localStorage.setItem("priceradar_recent", JSON.stringify(updated));
+      setSearchTrigger((t) => t + 1);
+    } catch {}
+
     setLoading(true);
     setError("");
     setResults([]);
@@ -170,6 +186,11 @@ export default function Dashboard() {
     }
   }
 
+  function handleSelectRecent(term: string) {
+    setSearchQuery(term);
+    handleSearch(term);
+  }
+
   async function handleAnalyse() {
     setAnalysing(true);
     setAnalysisError("");
@@ -177,7 +198,7 @@ export default function Dashboard() {
       const res = await fetch("/api/analyse", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: searchQuery, results }),
+        body: JSON.stringify({ query: searchQuery, results, category }),
       });
       if (!res.ok) throw new Error(`Analysis failed (${res.status})`);
       setAnalysis(await res.json());
@@ -265,7 +286,7 @@ export default function Dashboard() {
               className="flex-1 min-w-0 px-4 py-2 text-sm border-2 border-r-0 border-black bg-white outline-none focus:border-green-600 transition-colors text-black placeholder:text-gray-400"
             />
             <button
-              onClick={handleSearch}
+              onClick={() => handleSearch()}
               disabled={loading || !searchQuery.trim()}
               className="px-5 py-2 bg-black text-white text-[11px] font-bold tracking-[0.15em] uppercase border-2 border-black hover:bg-green-600 hover:border-green-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
             >
@@ -281,6 +302,11 @@ export default function Dashboard() {
           </button>
         </div>
       </nav>
+
+      {/* ── Recent Searches ── */}
+      <div className="border-b border-gray-100 bg-white">
+        <RecentSearches onSelect={handleSelectRecent} refreshTrigger={searchTrigger} />
+      </div>
 
       {/* ── Category Tabs ── */}
       <div className="border-b border-gray-200 bg-white">
@@ -410,6 +436,16 @@ export default function Dashboard() {
                 </section>
               )}
 
+              {/* Price Spread Chart */}
+              <section>
+                <PriceSpreadChart
+                  results={results.map((r) => {
+                    const p = r.results[0] ? parsePrice(r.results[0].price) : Infinity;
+                    return { platform: r.platform, price: p === Infinity ? null : p };
+                  })}
+                />
+              </section>
+
               {/* AI Deal Analysis */}
               <section>
                 {!analysis && !analysing && (
@@ -443,6 +479,7 @@ export default function Dashboard() {
                 )}
 
                 {analysis && (
+                  <div>
                   <div className="border-2 border-black overflow-hidden">
                     {/* Header */}
                     <div className="flex items-center justify-between px-5 py-3 border-b-2 border-black bg-black">
@@ -517,6 +554,13 @@ export default function Dashboard() {
                         Analysis powered by Claude AI
                       </p>
                     </div>
+                  </div>
+                  {analysis.timing_verdict && (
+                    <TimingVerdict
+                      verdict={analysis.timing_verdict}
+                      reason={analysis.timing_reason ?? ""}
+                    />
+                  )}
                   </div>
                 )}
               </section>
